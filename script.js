@@ -1,7 +1,10 @@
 console.log(d3.version);
 
-
+// Global filter variables for sankey
 let selectedCountries = [];
+let selectedGenders = ["M", "F"];
+
+
 // Set up the SVG canvas dimensions
 const width = 900, height = 600;
 
@@ -15,6 +18,29 @@ const sankey = d3.sankey()
     .nodeWidth(20)
     .nodePadding(10)
     .extent([[1, 1], [width - 1, height - 6]]);
+
+// Function to handle gender filter changes
+function updateGenderFilter() {
+    // Get the state of the gender checkboxes
+    const maleChecked = document.getElementById("gender-male").checked;
+    const femaleChecked = document.getElementById("gender-female").checked;
+
+    // Update the selectedGenders array based on the checkbox states
+    selectedGenders = []; // Reset selectedGenders
+
+    if (maleChecked) {
+        selectedGenders.push("M");
+    }
+    if (femaleChecked) {
+        selectedGenders.push("F");
+    }
+
+    updateSankeyDiagram(selectedCountries, selectedGenders); // Update the Sankey diagram
+}
+
+document.getElementById("gender-male").addEventListener("change", updateGenderFilter);
+document.getElementById("gender-female").addEventListener("change", updateGenderFilter);
+
 
 // Function to populate the country dropdown
 function populateCountryDropdown() {
@@ -66,12 +92,12 @@ function updateSelectedCountries() {
 
                 // Update the UI and Sankey diagram
                 updateSelectedCountries();
-                updateSankeyDiagram(selectedCountries);
+                updateSankeyDiagram(selectedCountries, selectedGenders);
             });
     });
     console.log(selectedCountries);
     // Update the Sankey diagram
-    updateSankeyDiagram(selectedCountries);
+    updateSankeyDiagram(selectedCountries, selectedGenders);
 }
 
 // Update the event listener for country dropdown to properly handle multiple selections
@@ -85,17 +111,21 @@ function getSelectedCountries() {
         .map(item => item.textContent);
 }
 
-
 // Function to update the Sankey diagram based on selected countries
 // Function to update the Sankey diagram based on selected countries
-function updateSankeyDiagram(selectedCountries) {
+function updateSankeyDiagram(selectedCountries, selectedGenders) {
     // Load the data
     d3.csv("data/artvis_dump_NEW.csv").then(data => {
         console.time("Processing Data");
-
+        console.log(selectedCountries);
+        console.log(selectedGenders);
         // Filter the data based on selected countries
-        const filteredData = data.filter(d => selectedCountries.includes(d["a.nationality"]));
-
+        const filteredData = data.filter(d =>
+            selectedCountries.includes(d["a.nationality"]) &&
+            selectedGenders.includes(d["a.gender"]) &&
+            d["a.gender"] !== "\\N" // Exclude invalid gender values
+        );
+        console.log("Filtered Data:", filteredData);
 
         // Create a new aggregation based on Gender → Nationality → Exhibition Type
         const aggregatedLinks = d3.rollups(
@@ -214,30 +244,7 @@ function updateSankeyDiagram(selectedCountries) {
 populateCountryDropdown();
 // Add event listener for changes in country selection
 
-
-/*
-d3.csv("data/artvis_dump_NEW.csv").then(function(data) {
-    // Log the entire dataset to the console
-    console.log("Loaded Data:", data);
-
-    // Check if data is available
-    if (data.length > 0) {
-        // Take the first row of the data and display it in the output div
-        const firstRow = data[0]; // Get the first row from the CSV data
-        const outputDiv = d3.select("#output"); // Select the output div
-        outputDiv.append("p").text(JSON.stringify(firstRow)); // Display it as JSON
-    } else {
-        // Display a message if no data is found
-        d3.select("#output").append("p").text("No data found in the CSV file.");
-    }
-}).catch(function(error) {
-    // If there's an error loading the CSV, log it to the console
-    console.error("Error loading the CSV file:", error);
-    d3.select("#output").append("p").text("Error loading the CSV file.");
+d3.csv("data/artvis_dump_NEW.csv").then(data => {
+    const allGenders = [...new Set(data.map(d => d["a.gender"]))];
+    console.log("Available Genders in Data:", allGenders);
 });
-
-
-
-
-
-*/
