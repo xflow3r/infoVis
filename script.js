@@ -3,7 +3,7 @@ console.log(d3.version);
 // Global filter variables for sankey
 let selectedCountries = [];
 let selectedGenders = ["M", "F"];
-
+let selectedTypes = ["group", "solo", "auction"];
 
 // Set up the SVG canvas dimensions
 const width = 900, height = 600;
@@ -18,6 +18,35 @@ const sankey = d3.sankey()
     .nodeWidth(20)
     .nodePadding(10)
     .extent([[1, 1], [width - 1, height - 6]]);
+
+// Function to handle type filter changes
+function updateTypeFilter() {
+    // Get the state of the type checkboxes
+    const groupChecked = document.getElementById("type-group").checked;
+    const soloChecked = document.getElementById("type-solo").checked;
+    const auctionChecked = document.getElementById("type-auction").checked;
+
+    // Update the selectedTypes array based on the checkbox states
+    selectedTypes = []; // Reset selectedTypes
+
+    if (groupChecked) {
+        selectedTypes.push("group");
+    }
+    if (soloChecked) {
+        selectedTypes.push("solo");
+    }
+    if (auctionChecked) {
+        selectedTypes.push("auction");
+    }
+
+    // Call updateSankeyDiagram with the updated filters
+    updateSankeyDiagram(selectedCountries, selectedGenders, selectedTypes);
+}
+
+document.getElementById("type-group").addEventListener("change", updateTypeFilter);
+document.getElementById("type-solo").addEventListener("change", updateTypeFilter);
+document.getElementById("type-auction").addEventListener("change", updateTypeFilter);
+
 
 // Function to handle gender filter changes
 function updateGenderFilter() {
@@ -35,7 +64,7 @@ function updateGenderFilter() {
         selectedGenders.push("F");
     }
 
-    updateSankeyDiagram(selectedCountries, selectedGenders); // Update the Sankey diagram
+    updateSankeyDiagram(selectedCountries, selectedGenders, selectedTypes); // Update the Sankey diagram
 }
 
 document.getElementById("gender-male").addEventListener("change", updateGenderFilter);
@@ -92,12 +121,12 @@ function updateSelectedCountries() {
 
                 // Update the UI and Sankey diagram
                 updateSelectedCountries();
-                updateSankeyDiagram(selectedCountries, selectedGenders);
+                updateSankeyDiagram(selectedCountries, selectedGenders, selectedTypes);
             });
     });
     console.log(selectedCountries);
     // Update the Sankey diagram
-    updateSankeyDiagram(selectedCountries, selectedGenders);
+    updateSankeyDiagram(selectedCountries, selectedGenders, selectedTypes);
 }
 
 // Update the event listener for country dropdown to properly handle multiple selections
@@ -113,7 +142,7 @@ function getSelectedCountries() {
 
 // Function to update the Sankey diagram based on selected countries
 // Function to update the Sankey diagram based on selected countries
-function updateSankeyDiagram(selectedCountries, selectedGenders) {
+function updateSankeyDiagram(selectedCountries, selectedGenders, selectedTypes) {
     // Load the data
     d3.csv("data/artvis_dump_NEW.csv").then(data => {
         console.time("Processing Data");
@@ -123,6 +152,7 @@ function updateSankeyDiagram(selectedCountries, selectedGenders) {
         const filteredData = data.filter(d =>
             selectedCountries.includes(d["a.nationality"]) &&
             selectedGenders.includes(d["a.gender"]) &&
+            selectedTypes.includes(d["e.type"]) && // Add filter for type
             d["a.gender"] !== "\\N" // Exclude invalid gender values
         );
         console.log("Filtered Data:", filteredData);
