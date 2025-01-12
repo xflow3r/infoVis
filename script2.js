@@ -3,6 +3,17 @@
 const width = 960;
 const height = 500;
 
+// Add radio buttons for gender filtering
+d3.select("body")
+    .append("div")
+    .attr("id", "filters")
+    .html(`
+        <label><input type="radio" name="gender" value="all" checked> All</label>
+        <label><input type="radio" name="gender" value="male"> Male</label>
+        <label><input type="radio" name="gender" value="female"> Female</label>
+        <label><input type="radio" name="gender" value="other"> Other</label>
+    `);
+
 const canvas = d3.select("body")
     .append("canvas")
     .attr("width", width)
@@ -25,51 +36,91 @@ Promise.all([
 ]).then(([europeData, artistData]) => {
     const countries = europeData.features;
 
-    // Aggregate artist data by 2-letter nationality codes
+    // Aggregate artist data by 2-letter nationality codes and gender
     const artistCounts = d3.rollup(
+        artistData,
+        v => v.length, // Count artists for each country
+        d => d["a.nationality"],
+        d => d["a.gender"]
+    );
+
+    const artistCounts2 = d3.rollup(
         artistData,
         v => v.length, // Count artists for each country
         d => d["a.nationality"]
     );
+    console.log("Artist counts by nationality:", artistCounts2);
 
-    console.log("Artist counts by 2-letter code:", artistCounts);
+    console.log("Artist counts by nationality and gender:", artistCounts);
 
     // Map from 2-letter codes to full country names
     const countryCodeMap = new Map(countries.map(f => [f.properties.ISO_A2, f.properties.ADMIN]));
 
-    // Map artist counts to full country names
-    const artistCountsByCountry = new Map();
-    artistCounts.forEach((count, code) => {
-        const fullName = countryCodeMap.get(code);
-        if (fullName) {
-            artistCountsByCountry.set(fullName, count);
+    // Function to redraw the map based on selected gender
+    function drawMap() {
+        // Get selected gender
+        const selectedGender = d3.select("input[name=gender]:checked").property("value");
+
+        // Define color scales based on selected gender
+        let colorScale;
+        if (selectedGender === "all") {
+            colorScale = d3.scaleSequentialLog(d3.interpolateYlOrBr);
+        } else if (selectedGender === "male") {
+            colorScale = d3.scaleSequentialLog(d3.interpolateBlues);
+        } else if (selectedGender === "female") {
+            colorScale = d3.scaleSequentialLog(d3.interpolateReds);
+        } else {
+            colorScale = d3.scaleSequentialLog(d3.interpolateGreens);
         }
-    });
 
-    console.log("Mapped artist counts by full country name:", artistCountsByCountry);
+        // Map artist counts to full country names
+        const artistCountsByCountry = new Map();
+        artistCounts.forEach((genderMap, code) => {
+            const fullName = countryCodeMap.get(code);
+            if (fullName) {
+                let total = 0;
+                if (selectedGender === "all") {
+                    total = Array.from(genderMap.values()).reduce((sum, count) => sum + count, 0);
+                } else {
+                    total = genderMap.get(selectedGender.charAt(0).toUpperCase()) || 0;
+                }
+                artistCountsByCountry.set(fullName, total);
+            }
+        });
 
-    // Find min and max artist counts for color scaling
-    const maxCount = d3.max(Array.from(artistCountsByCountry.values()));
+        console.log("Mapped artist counts by full country name:", artistCountsByCountry);
 
-    // Define a color scale
-    const colorScale = d3.scaleSequentialLog(d3.interpolateReds)
-        .domain([1, maxCount]);
+        // Find max artist count for color scaling
+        const maxCount = d3.max(Array.from(artistCountsByCountry.values()));
 
-    // Draw the map
-    countries.forEach(feature => {
-        const countryName = feature.properties.ADMIN; // Match the country name property
-        const count = artistCountsByCountry.get(countryName) || 0;
+        // Set domain for the color scale
+        colorScale.domain([1, maxCount]);
 
-        context.beginPath();
-        path(feature);
-        context.fillStyle = count > 0 ? colorScale(count) : "#ccc"; // Use heatmap or default color
-        context.fill();
-        context.strokeStyle = "#000"; // Border for countries
-        context.stroke();
+        // Clear the canvas
+        context.clearRect(0, 0, width, height);
 
-        // Add tooltip functionality
-        feature.properties.artistCount = count; // Attach count to feature for later use
-    });
+        // Draw the map
+        countries.forEach(feature => {
+            const countryName = feature.properties.ADMIN; // Match the country name property
+            const count = artistCountsByCountry.get(countryName) || 0;
+
+            context.beginPath();
+            path(feature);
+            context.fillStyle = count > 0 ? colorScale(count) : "#ccc"; // Use heatmap or default color
+            context.fill();
+            context.strokeStyle = "#000"; // Border for countries
+            context.stroke();
+
+            // Add tooltip functionality
+            feature.properties.artistCount = count; // Attach count to feature for later use
+        });
+    }
+
+    // Initial drawing of the map
+    drawMap();
+
+    // Update map when radio buttons change
+    d3.selectAll("#filters input[type=radio]").on("change", drawMap);
 
     // Tooltip setup
     const tooltip = d3.select("body")
