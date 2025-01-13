@@ -14,6 +14,16 @@ d3.select("body")
         <label><input type="radio" name="gender" value="other"> Other</label>
     `);
 
+// Add slider for year filtering
+d3.select("body")
+    .append("div")
+    .attr("id", "year-filter")
+    .html(`
+        <label for="year-slider">Year:</label>
+        <input type="range" id="year-slider" min="0" max="2023" step="1" value="2023">
+        <span id="year-value">2023</span>
+    `);
+
 const canvas = d3.select("body")
     .append("canvas")
     .attr("width", width)
@@ -36,30 +46,25 @@ Promise.all([
 ]).then(([europeData, artistData]) => {
     const countries = europeData.features;
 
-    // Aggregate artist data by 2-letter nationality codes and gender
+    // Normalize nationality codes and prepare artist data
     const artistCounts = d3.rollup(
         artistData,
         v => v.length, // Count artists for each country
-        d => d["a.nationality"],
-        d => d["a.gender"]
+        d => d["a.nationality"]?.trim()?.toUpperCase() || "", // Handle missing or invalid data
+        d => d["a.gender"]?.trim()?.toUpperCase() || "UNKNOWN",
+        d => {
+            const birthdate = d["a.birthdate"];
+            if (!birthdate || !/^\d{4}-\d{2}-\d{2}$/.test(birthdate)) return 2023; // Validate birthdate format
+            return parseInt(birthdate.split('-')[0], 10); // Extract the year from birthdate
+        }
     );
+    console.log("Aggregated Artist Data:", artistCounts);
 
-    const artistCounts2 = d3.rollup(
-        artistData,
-        v => v.length, // Count artists for each country
-        d => d["a.nationality"]
-    );
-    console.log("Artist counts by nationality:", artistCounts2);
+    const countryCodeMap = new Map(countries.map(f => [f.properties.ISO_A2.trim().toUpperCase(), f.properties.ADMIN]));
 
-    console.log("Artist counts by nationality and gender:", artistCounts);
-
-    // Map from 2-letter codes to full country names
-    const countryCodeMap = new Map(countries.map(f => [f.properties.ISO_A2, f.properties.ADMIN]));
-
-    // Function to redraw the map based on selected gender
     function drawMap() {
-        // Get selected gender
         const selectedGender = d3.select("input[name=gender]:checked").property("value");
+        const selectedYear = +d3.select("#year-slider").property("value");
 
         // Define color scales based on selected gender
         let colorScale;
@@ -73,56 +78,64 @@ Promise.all([
             colorScale = d3.scaleSequentialLog(d3.interpolateGreens);
         }
 
-        // Map artist counts to full country names
         const artistCountsByCountry = new Map();
         artistCounts.forEach((genderMap, code) => {
             const fullName = countryCodeMap.get(code);
             if (fullName) {
                 let total = 0;
                 if (selectedGender === "all") {
-                    total = Array.from(genderMap.values()).reduce((sum, count) => sum + count, 0);
+                    genderMap.forEach((yearMap) => {
+                        console.log(yearMap)
+                        yearMap.forEach((count, year) => {
+                            if (!isNaN(year) && year <= selectedYear) {
+                                total += count;
+                            }
+                        });
+                    });
                 } else {
-                    total = genderMap.get(selectedGender.charAt(0).toUpperCase()) || 0;
+                    const yearMap = genderMap.get(selectedGender.charAt(0).toUpperCase());
+                    if (yearMap) {
+                        yearMap.forEach((count, year) => {
+                            if (!isNaN(year) && year <= selectedYear) {
+                                total += count;
+                            }
+                        });
+                    }
                 }
                 artistCountsByCountry.set(fullName, total);
             }
         });
 
-        console.log("Mapped artist counts by full country name:", artistCountsByCountry);
+        console.log("Artist Counts by Country:", artistCountsByCountry);
 
-        // Find max artist count for color scaling
         const maxCount = d3.max(Array.from(artistCountsByCountry.values()));
+        colorScale.domain([1, maxCount || 1]); // Ensure domain is valid
 
-        // Set domain for the color scale
-        colorScale.domain([1, maxCount]);
-
-        // Clear the canvas
         context.clearRect(0, 0, width, height);
 
-        // Draw the map
         countries.forEach(feature => {
-            const countryName = feature.properties.ADMIN; // Match the country name property
+            const countryName = feature.properties.ADMIN;
             const count = artistCountsByCountry.get(countryName) || 0;
 
             context.beginPath();
             path(feature);
-            context.fillStyle = count > 0 ? colorScale(count) : "#ccc"; // Use heatmap or default color
+            context.fillStyle = count > 0 ? colorScale(count) : "#ccc";
             context.fill();
-            context.strokeStyle = "#000"; // Border for countries
+            context.strokeStyle = "#000";
             context.stroke();
 
-            // Add tooltip functionality
-            feature.properties.artistCount = count; // Attach count to feature for later use
+            feature.properties.artistCount = count;
         });
     }
 
-    // Initial drawing of the map
     drawMap();
 
-    // Update map when radio buttons change
     d3.selectAll("#filters input[type=radio]").on("change", drawMap);
+    d3.select("#year-slider").on("input", function () {
+        d3.select("#year-value").text(this.value);
+        drawMap();
+    });
 
-    // Tooltip setup
     const tooltip = d3.select("body")
         .append("div")
         .attr("id", "tooltip")
