@@ -272,6 +272,7 @@ Promise.all([
 
             console.log(dataByCountry(selectedCountry));
             drawGenderDonutChart(selectedCountry);
+            drawGenderLineChart(selectedCountry)
         } else {
             // Reset selection if clicked outside any country
             selectedCountry = null;
@@ -415,4 +416,133 @@ function drawGenderDonutChart(selectedCountry) {
 
 }
 
+function drawGenderLineChart(selectedCountry) {
+    // Clear the existing chart (if any)
+    d3.select("#line-chart").html("");
+
+    // Load the CSV data
+    d3.csv("data/artvis_dump_NEW.csv").then(data => {
+
+        // Filter the data by selected country
+        const countryData = data.filter(d => d["a.nationality"] === mapCountryToCode(selectedCountry));
+
+        // Prepare data: group by year and count male/female artists
+        const genderByYear = {};
+
+        countryData.forEach(d => {
+            const year = d["a.birthdate"].split("-")[0];  // Extract year from birthdate
+
+            if (+year > 1200) {
+                const gender = d["a.gender"];
+
+                if (!genderByYear[year]) {
+                    genderByYear[year] = { male: 0, female: 0 };
+                }
+
+                // Increment counts based on gender
+                if (gender === "M") {
+                    genderByYear[year].male++;
+                } else if (gender === "F") {
+                    genderByYear[year].female++;
+                }
+            }
+        });
+
+        // Convert the grouped data into an array of objects suitable for plotting
+        const years = Object.keys(genderByYear).map(year => ({
+            year: +year,  // Convert year to number for proper sorting
+            male: genderByYear[year].male,
+            female: genderByYear[year].female
+        }));
+
+        // Sort the data by year
+        years.sort((a, b) => a.year - b.year);
+
+        // Set up chart dimensions and margins
+        const margin = { top: 40, right: 40, bottom: 40, left: 60 };
+        const width = 800 - margin.left - margin.right;
+        const height = 400 - margin.top - margin.bottom;
+
+        // Set up scales
+        const xScale = d3.scaleLinear()
+            .domain([d3.min(years, d => d.year), d3.max(years, d => d.year)])  // X-axis scale: year
+            .range([0, width]);
+
+        const yScale = d3.scaleLinear()
+            .domain([0, d3.max(years, d => Math.max(d.male, d.female))])  // Y-axis scale: count
+            .range([height, 0]);
+
+        // Set up line generators
+        const maleLine = d3.line()
+            .x(d => xScale(d.year))
+            .y(d => yScale(d.male));
+
+        const femaleLine = d3.line()
+            .x(d => xScale(d.year))
+            .y(d => yScale(d.female));
+
+        // Create the SVG container for the line chart
+        const svg = d3.select("#line-chart")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // Add the X axis
+        svg.append("g")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(xScale));
+
+        // Add the Y axis
+        svg.append("g")
+            .call(d3.axisLeft(yScale));
+
+        // Add the male line
+        svg.append("path")
+            .data([years])
+            .attr("class", "male-line")
+            .attr("d", maleLine)
+            .style("stroke", "blue")
+            .style("stroke-width", 2)
+            .style("fill", "none");
+
+        // Add the female line
+        svg.append("path")
+            .data([years])
+            .attr("class", "female-line")
+            .attr("d", femaleLine)
+            .style("stroke", "orange")
+            .style("stroke-width", 2)
+            .style("fill", "none");
+
+        // Add labels to the lines
+        svg.append("text")
+            .attr("x", width - 10)
+            .attr("y", yScale(years[years.length - 1].male))
+            .attr("dy", ".35em")
+            .attr("text-anchor", "end")
+            .style("fill", "blue")
+            .text("Male Artists");
+
+        svg.append("text")
+            .attr("x", width - 10)
+            .attr("y", yScale(years[years.length - 1].female))
+            .attr("dy", ".35em")
+            .attr("text-anchor", "end")
+            .style("fill", "orange")
+            .text("Female Artists");
+
+        // Add a title to the chart
+        svg.append("text")
+            .attr("x", width / 2)
+            .attr("y", -20)
+            .attr("text-anchor", "middle")
+            .style("font-size", "16px")
+            .text(`Gender Evolution of Artists in ${selectedCountry}`);
+
+    }).catch(error => {
+        console.error("Error loading data:", error);
+    });
+}
 
