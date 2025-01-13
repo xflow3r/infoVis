@@ -14,10 +14,19 @@ d3.select("body")
         <label><input type="radio" name="gender" value="other"> Other</label>
     `);
 
+// Add checkbox for year filtering
+d3.select("body")
+    .append("div")
+    .attr("id", "year-filter-checkbox")
+    .html(`
+        <label><input type="checkbox" id="filter-by-year"> Filter by Year</label>
+    `);
+
 // Add slider for year filtering
 d3.select("body")
     .append("div")
     .attr("id", "year-filter")
+    .style("visibility", "hidden") // Initially hidden
     .html(`
         <label for="year-slider">Year:</label>
         <input type="range" id="year-slider" min="0" max="2023" step="1" value="2023">
@@ -54,17 +63,36 @@ Promise.all([
         d => d["a.gender"]?.trim()?.toUpperCase() || "UNKNOWN",
         d => {
             const birthdate = d["a.birthdate"];
-            if (!birthdate || !/^\d{4}-\d{2}-\d{2}$/.test(birthdate)) return 2023; // Validate birthdate format
-            return parseInt(birthdate.split('-')[0], 10); // Extract the year from birthdate
+            if (!birthdate || !/^\d{4}-\d{2}-\d{2}$/.test(birthdate)) return 0;
+            return parseInt(birthdate.split('-')[0], 10); // Extract year from birthdate
         }
     );
     console.log("Aggregated Artist Data:", artistCounts);
+
+    // Find the minimum birth year (excluding 0)
+    const minYear = d3.min(Array.from(artistData, d => {
+        const birthdate = d["a.birthdate"];
+        if (birthdate && /^\d{4}-\d{2}-\d{2}$/.test(birthdate)) {
+            const year = parseInt(birthdate.split('-')[0], 10);
+            return year > 0 ? year : null;
+        }
+        return null;
+    }).filter(year => year !== null)) - 1;
+
+    console.log("Minimum Year:", minYear);
+
+    // Update slider minimum value
+    d3.select("#year-slider").attr("min", minYear || 0);
 
     const countryCodeMap = new Map(countries.map(f => [f.properties.ISO_A2.trim().toUpperCase(), f.properties.ADMIN]));
 
     function drawMap() {
         const selectedGender = d3.select("input[name=gender]:checked").property("value");
         const selectedYear = +d3.select("#year-slider").property("value");
+        const filterByYear = d3.select("#filter-by-year").property("checked");
+
+        // Show or hide the slider based on checkbox
+        d3.select("#year-filter").style("visibility", filterByYear ? "visible" : "hidden");
 
         // Define color scales based on selected gender
         let colorScale;
@@ -85,18 +113,17 @@ Promise.all([
                 let total = 0;
                 if (selectedGender === "all") {
                     genderMap.forEach((yearMap) => {
-                        console.log(yearMap)
                         yearMap.forEach((count, year) => {
-                            if (!isNaN(year) && year <= selectedYear) {
+                            if ((!filterByYear || (year !== 0 && year <= selectedYear))) {
                                 total += count;
                             }
                         });
                     });
                 } else {
-                    const yearMap = genderMap.get(selectedGender.charAt(0).toUpperCase());
+                    const yearMap = genderMap.get(selectedGender.toUpperCase());
                     if (yearMap) {
                         yearMap.forEach((count, year) => {
-                            if (!isNaN(year) && year <= selectedYear) {
+                            if ((!filterByYear || (year !== 0 && year <= selectedYear))) {
                                 total += count;
                             }
                         });
@@ -105,8 +132,6 @@ Promise.all([
                 artistCountsByCountry.set(fullName, total);
             }
         });
-
-        console.log("Artist Counts by Country:", artistCountsByCountry);
 
         const maxCount = d3.max(Array.from(artistCountsByCountry.values()));
         colorScale.domain([1, maxCount || 1]); // Ensure domain is valid
@@ -135,6 +160,7 @@ Promise.all([
         d3.select("#year-value").text(this.value);
         drawMap();
     });
+    d3.select("#filter-by-year").on("change", drawMap);
 
     const tooltip = d3.select("body")
         .append("div")
