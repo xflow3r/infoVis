@@ -8,10 +8,10 @@ d3.select("body")
     .append("div")
     .attr("id", "filters")
     .html(`
-        <label><input type="radio" name="gender" value="all" checked> All</label>
-        <label><input type="radio" name="gender" value="male"> Male</label>
-        <label><input type="radio" name="gender" value="female"> Female</label>
-        <label><input type="radio" name="gender" value="other"> Other</label>
+        <label><input type="radio" name="gender" value="A" checked> All</label>
+        <label><input type="radio" name="gender" value="M"> Male</label>
+        <label><input type="radio" name="gender" value="F"> Female</label>
+        <label><input type="radio" name="gender" value="O"> Other</label>
     `);
 
 // Add checkbox for year filtering
@@ -96,11 +96,11 @@ Promise.all([
 
         // Define color scales based on selected gender
         let colorScale;
-        if (selectedGender === "all") {
+        if (selectedGender === "A") {
             colorScale = d3.scaleSequentialLog(d3.interpolateYlOrBr);
-        } else if (selectedGender === "male") {
+        } else if (selectedGender === "M") {
             colorScale = d3.scaleSequentialLog(d3.interpolateBlues);
-        } else if (selectedGender === "female") {
+        } else if (selectedGender === "F") {
             colorScale = d3.scaleSequentialLog(d3.interpolateReds);
         } else {
             colorScale = d3.scaleSequentialLog(d3.interpolateGreens);
@@ -108,10 +108,13 @@ Promise.all([
 
         const artistCountsByCountry = new Map();
         artistCounts.forEach((genderMap, code) => {
+            console.log(`Gender Map for '${code}':`, genderMap); // Debug log
+
             const fullName = countryCodeMap.get(code);
             if (fullName) {
                 let total = 0;
-                if (selectedGender === "all") {
+
+                if (selectedGender === "A") {
                     genderMap.forEach((yearMap) => {
                         yearMap.forEach((count, year) => {
                             if ((!filterByYear || (year !== 0 && year <= selectedYear))) {
@@ -121,17 +124,22 @@ Promise.all([
                     });
                 } else {
                     const yearMap = genderMap.get(selectedGender.toUpperCase());
-                    if (yearMap) {
-                        yearMap.forEach((count, year) => {
-                            if ((!filterByYear || (year !== 0 && year <= selectedYear))) {
-                                total += count;
-                            }
-                        });
+                    if (!yearMap) {
+                        console.warn(`Gender '${selectedGender.toUpperCase()}' not found in Gender Map for code '${code}'`);
+                        artistCountsByCountry.set(fullName, total); // Set total as 0 for missing gender
+                        return;
                     }
+                    yearMap.forEach((count, year) => {
+                        if ((!filterByYear || (year !== 0 && year <= selectedYear))) {
+                            total += count;
+                        }
+                    });
                 }
                 artistCountsByCountry.set(fullName, total);
             }
         });
+
+
 
         const maxCount = d3.max(Array.from(artistCountsByCountry.values()));
         colorScale.domain([1, maxCount || 1]); // Ensure domain is valid
