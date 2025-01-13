@@ -2,6 +2,7 @@
 
 let selectedCountry = null;
 
+//TODO not all countries are valid i think
 const countryCodeMapping = {
     "United Kingdom": "GB",
     "Netherlands": "NL",
@@ -81,6 +82,7 @@ const projection = d3.geoMercator()
 
 const path = d3.geoPath().projection(projection).context(context);
 
+// Load Europe-specific GeoJSON data and artist data
 // Load Europe-specific GeoJSON data and artist data
 Promise.all([
     fetch("https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson").then(res => res.json()),
@@ -269,6 +271,7 @@ Promise.all([
                 .html(`Selected: ${clickedFeature.properties.ADMIN}`);
 
             console.log(dataByCountry(selectedCountry));
+            drawGenderDonutChart(selectedCountry);
         } else {
             // Reset selection if clicked outside any country
             selectedCountry = null;
@@ -298,6 +301,8 @@ function dataByCountry(country) {
     const filteredData = data.filter(d => d["a.nationality"] === countryCode);
 
     console.log(`Filtered data for ${country} (${countryCode}):`, filteredData);
+    getUniqueExhibitionCountries(filteredData);
+
     return filteredData;
     }).catch(error => {
         console.error("Error in Sankey update:", error);
@@ -317,10 +322,97 @@ function getUniqueExhibitionCountries(data) {
     return Array.from(uniqueCountries); // Return as array
 }
 
-// Example usage
-d3.csv("data/artvis_dump_NEW.csv").then(data => {
-    const uniqueExhibitionCountries = getUniqueExhibitionCountries(data);
 
-    // Do something with the unique countries, like displaying in a dropdown or console logging
-    console.log("Unique Countries:", uniqueExhibitionCountries);
-});
+
+function drawGenderDonutChart(selectedCountry) {
+    // Count male and female artists
+    d3.select("#donut-chart").html("");
+    d3.csv("data/artvis_dump_NEW.csv").then(data => {
+
+        const countryData = data.filter(d => d["a.nationality"] === mapCountryToCode(selectedCountry));
+
+        console.log("Chart Data:", countryData);
+
+        // Initialize counts for male, female, other
+        let maleCount = 0;
+        let femaleCount = 0;
+        let otherCount = 0;
+
+        countryData.forEach(d => {
+            const gender = d["a.gender"];
+            if (gender === "M") {
+                maleCount++;
+            } else if (gender === "F") {
+                femaleCount++;
+            } else if (gender === "O") {
+                otherCount++;
+            }
+        });
+
+        const chartData = [
+            { label: "Male", value: maleCount, color: "#1f77b4" },    // Adjust color as needed
+            { label: "Female", value: femaleCount, color: "#ff7f0e" }  // Adjust color as needed
+        ];
+
+        const filteredChartData = chartData.filter(d => d.value > 0);
+
+        console.log("Chart Data:", filteredChartData);
+
+        // Set up dimensions for the donut chart
+        const width = 400;
+        const height = 400;
+        const margin = 40;
+        const radius = Math.min(width, height) / 2 - margin;
+
+
+        console.log("Creating SVG...");
+        // Create an SVG element for the donut chart
+        const svg = d3.select("#donut-chart")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .append("g")
+            .attr("transform", `translate(${width / 2},${height / 2})`);
+
+        // Set up the color scale
+        const colorScale = d3.scaleOrdinal()
+            .domain(chartData.map(d => d.label))
+            .range(chartData.map(d => d.color));
+
+        // Set up the arc generator
+        const arc = d3.arc()
+            .innerRadius(radius * 0.5)  // Create the "donut" by setting the inner radius
+            .outerRadius(radius);
+
+        // Set up the pie generator
+        const pie = d3.pie()
+            .value(d => d.value)
+            .sort(null); // No sorting of data
+
+        // Draw the donut slices
+        svg.selectAll(".arc")
+            .data(pie(chartData))
+            .enter().append("path")
+            .attr("class", "arc")
+            .attr("d", arc)
+            .attr("fill", d => colorScale(d.data.label));
+
+        // Add labels to the donut chart
+        svg.selectAll(".label")
+            .data(pie(chartData))
+            .enter().append("text")
+            .attr("transform", d => `translate(${arc.centroid(d)})`)
+            .attr("dy", ".35em")
+            .attr("text-anchor", "middle")
+            .text(d => `${d.data.label}: ${d.data.value}`)
+            .style("font-size", "14px")
+            .style("fill", "white");
+
+
+    }).catch(error => {
+        console.error("Error in Sankey update:", error);
+    });
+
+}
+
+
