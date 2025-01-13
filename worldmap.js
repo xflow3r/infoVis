@@ -2,6 +2,64 @@
 
 let selectedCountry = null;
 
+const countryCodeMapping = {
+    "United Kingdom": "GB",
+    "Netherlands": "NL",
+    "Russia": "RU",
+    "Switzerland": "CH",
+    "United States": "US",
+    "France": "FR",
+    "Italy": "IT",
+    "Germany": "DE",
+    "Czech Republic": "CZ",
+    "Hungary": "HU",
+    "Ukraine": "UA",
+    "Romania": "RO",
+    "Australia": "AU",
+    "Belgium": "BE",
+    "Belarus": "BY",
+    "Austria": "AT",
+    "Norway": "NO",
+    "Sweden": "SE",
+    "Unknown": "\\N", // For invalid or missing country values
+    "Finland": "FI",
+    "Spain": "ES",
+    "Poland": "PL",
+    "Bulgaria": "BG",
+    "Georgia": "GE",
+    "Mexico": "MX",
+    "Armenia": "AM",
+    "Israel": "IL",
+    "Portugal": "PT",
+    "Denmark": "DK",
+    "Ireland": "IE",
+    "Croatia": "HR",
+    "Chile": "CL",
+    "Slovakia": "SK",
+    "Greece": "GR",
+    "Lithuania": "LT",
+    "Latvia": "LV",
+    "Canada": "CA",
+    "Dominican Republic": "DO",
+    "Peru": "PE",
+    "Japan": "JP",
+    "Serbia": "RS",
+    "Turkey": "TR",
+    "Slovenia": "SI",
+    "Estonia": "EE",
+    "Argentina": "AR",
+    "South Africa": "ZA",
+    "Luxembourg": "LU",
+    "New Zealand": "NZ",
+    "Venezuela": "VE",
+    "Guatemala": "GT",
+    "Uruguay": "UY",
+    "El Salvador": "SV",
+    "Bosnia and Herzegovina": "BA",
+    "India": "IN",
+    "Montenegro": "ME"
+};
+
 
 const width_map = 960;
 const height_map = 500;
@@ -209,6 +267,8 @@ Promise.all([
                 .style("left", `${event.pageX + 10}px`)
                 .style("top", `${event.pageY + 10}px`)
                 .html(`Selected: ${clickedFeature.properties.ADMIN}`);
+
+            console.log(dataByCountry(selectedCountry));
         } else {
             // Reset selection if clicked outside any country
             selectedCountry = null;
@@ -219,3 +279,48 @@ Promise.all([
 
 
 }).catch(err => console.error("Error loading data:", err));
+
+function mapCountryToCode(country) {
+    return countryCodeMapping[country] || null; // Return null if no mapping found
+}
+
+function dataByCountry(country) {
+    const countryCode = mapCountryToCode(country);
+    console.log("countrycode:");
+    console.log(countryCode);
+    if (!countryCode) {
+        console.warn(`No country code found for country: ${countryName}`);
+        return [];
+    }
+
+    d3.csv("data/artvis_dump_NEW.csv").then(data => {
+
+    const filteredData = data.filter(d => d["a.nationality"] === countryCode);
+
+    console.log(`Filtered data for ${country} (${countryCode}):`, filteredData);
+    return filteredData;
+    }).catch(error => {
+        console.error("Error in Sankey update:", error);
+    });
+}
+
+function getUniqueExhibitionCountries(data) {
+    const uniqueCountries = new Set(); // Using a Set to automatically filter out duplicates
+
+    data.forEach(d => {
+        if (d["a.nationality"]) {
+            uniqueCountries.add(d["a.nationality"].trim().toUpperCase()); // Ensure we handle any extra spaces and case sensitivity
+        }
+    });
+
+    console.log("Unique Exhibition Countries:", Array.from(uniqueCountries)); // Convert Set to Array for display
+    return Array.from(uniqueCountries); // Return as array
+}
+
+// Example usage
+d3.csv("data/artvis_dump_NEW.csv").then(data => {
+    const uniqueExhibitionCountries = getUniqueExhibitionCountries(data);
+
+    // Do something with the unique countries, like displaying in a dropdown or console logging
+    console.log("Unique Countries:", uniqueExhibitionCountries);
+});
