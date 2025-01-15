@@ -5,15 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>InfoVis UE2</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="header.css">
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
 </head>
 <body>
 
-<h1>Data Visualization</h1>
-<a href="index2.html"> Bitte drück mich. Ich bin ein schöner Link dem man vertrauen darf :3</a><br>
- Multi-select for countries
-<h1>Heatmap</h1>
+<header>
+    <h1>Data Visualization</h1>
+    <nav>
+        <a href="#heatmap">Heatmap</a>
+        <a href="#sankey">Sankey Diagram</a>
+        <a href="#details">Details View</a>
+    </nav>
+</header>
+
+<h1 id="heatmap">Heatmap</h1>
 
 <!-- Filters Section -->
 <div id="filters">
@@ -38,12 +45,12 @@
 <script src="worldmap.js"></script>
 <!-- Other section -->
 
-<h2>Details view of selected country</h2>
+<h2 id="details">Details view of selected country</h2>
 
 <div id="donut-chart"></div>
 <div id="line-chart"></div>
 
-<h1>Sankey Diagramm</h1>
+<h1 id="sankey">Sankey Diagram</h1>
 <h2>Select Countries</h2>
 <!-- Dropdown to select countries -->
 <label for="country-dropdown">Select Country: </label>
@@ -74,7 +81,6 @@
 <div id="chart"></div>
 
 <script src="script.js"></script>
-
 
 </body>
 </html>
