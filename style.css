@@ -59,6 +59,16 @@ header nav a:hover {
     color: var(--primary-color);
 }
 
+.chart-container {
+    display: flex;           /* Use Flexbox */
+    justify-content: space-between; /* Optional: space between the charts */
+    gap: 20px;               /* Optional: add space between charts */
+}
+
+#donut-chart, #line-chart {
+    flex: 1;                 /* Each chart takes equal width */
+}
+
 /* Container styles */
 .container {
     max-width: 1200px;
