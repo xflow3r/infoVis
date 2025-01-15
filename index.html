@@ -11,6 +11,12 @@
     <link rel="stylesheet" href="https://d3-geomap.github.io/d3-geomap/css/d3.geomap.min.css">
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://d3-geomap.github.io/d3-geomap/js/d3.geomap.min.js"></script>
+
+    <script src="https://unpkg.com/d3-array@1"></script>
+    <script src="https://unpkg.com/d3-collection@1"></script>
+    <script src="https://unpkg.com/d3-path@1"></script>
+    <script src="https://unpkg.com/d3-shape@1"></script>
+    <script src="https://unpkg.com/d3-sankey@0"></script>
 </head>
 <body>
 
@@ -30,43 +36,47 @@
     <h1 id="heatmap">Heatmap</h1>
 
     <!-- Filters Section -->
-    <div id="filters" class="mb-4">
-        <h2>Filter by Gender</h2>
-        <div class="form-check">
-            <input class="form-check-input" type="radio" name="gender" value="A" id="gender-all" checked>
-            <label class="form-check-label" for="gender-all">All</label>
+    <div class="flex-container">
+        <div class="flex-item">
+            <h2>Filter by Gender</h2>
+            <div class="gender-filters">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="gender" value="A" id="gender-all" checked>
+                    <label class="form-check-label" for="gender-all">All</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="gender" value="M" id="gender-male">
+                    <label class="form-check-label" for="gender-male">Male</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="gender" value="F" id="gender-female">
+                    <label class="form-check-label" for="gender-female">Female</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="gender" value="O" id="gender-other">
+                    <label class="form-check-label" for="gender-other">Other</label>
+                </div>
+            </div>
         </div>
-        <div class="form-check">
-            <input class="form-check-input" type="radio" name="gender" value="M" id="gender-male">
-            <label class="form-check-label" for="gender-male">Male</label>
-        </div>
-        <div class="form-check">
-            <input class="form-check-input" type="radio" name="gender" value="F" id="gender-female">
-            <label class="form-check-label" for="gender-female">Female</label>
-        </div>
-        <div class="form-check">
-            <input class="form-check-input" type="radio" name="gender" value="O" id="gender-other">
-            <label class="form-check-label" for="gender-other">Other</label>
+        <div class="flex-item">
+            <h2>Filter by Year</h2>
+            <div class="year-filters">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="filter-by-year">
+                    <label class="form-check-label" for="filter-by-year">Filter by Year</label>
+                </div>
+                <div id="year-filter" class="form-check" style="visibility: hidden;">
+                    <label for="year-slider">Year:</label>
+                    <input type="range" id="year-slider" class="form-control-range" min="0" max="2023" step="1" value="2023">
+                    <span id="year-value">2023</span>
+                </div>
+            </div>
         </div>
     </div>
-
-    <div id="year-filter-checkbox" class="mb-4">
-        <h2>Filter by Year</h2>
-        <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="filter-by-year">
-            <label class="form-check-label" for="filter-by-year">Filter by Year</label>
-        </div>
-    </div>
-
-    <div id="year-filter" class="mb-4" style="visibility: hidden;">
-        <label for="year-slider">Year:</label>
-        <input type="range" id="year-slider" class="form-control-range" min="0" max="2023" step="1" value="2023">
-        <span id="year-value">2023</span>
-    </div>
+    <br>
 
     <div id="worldmap" class="mb-4"></div>
 </div>
-
 <div class="container mt-4">
     <h2 id="details">Details view of selected country</h2>
     <div id="donut-chart"></div>
@@ -75,39 +85,53 @@
 
 <div class="container mt-4">
     <h1 id="sankey">Sankey Diagram</h1>
-    <h2>Select Countries</h2>
-    <label for="country-dropdown">Select Country: </label>
-    <select id="country-dropdown" class="form-control" multiple size="10">
-        <option value="" disabled selected>Select a country</option>
-        <!-- Country options will be populated here -->
-    </select>
-    <h2>Selected Countries:</h2>
-    <ul id="selected-countries" class="list-group">
-        <!-- Selected countries will appear here -->
-    </ul>
-
-    <h2>Filter by Gender</h2>
-    <div class="form-check">
-        <input class="form-check-input" type="checkbox" id="gender-male-sankey" checked>
-        <label class="form-check-label" for="gender-male-sankey">Male</label>
-    </div>
-    <div class="form-check">
-        <input class="form-check-input" type="checkbox" id="gender-female-sankey" checked>
-        <label class="form-check-label" for="gender-female-sankey">Female</label>
+    <div class="flex-container">
+        <div class="flex-item">
+            <label for="country-dropdown">Select Country: </label>
+            <select id="country-dropdown" class="form-control" multiple size="10">
+                <option value="" disabled selected>Select a country</option>
+                <!-- Country options will be populated here -->
+            </select>
+        </div>
+        <div class="flex-item">
+            <label for="selected-countries">Countries selected: </label>
+            <ul id="selected-countries" class="list-group">
+                <!-- Selected countries will appear here -->
+            </ul>
+        </div>
     </div>
 
-    <h2>Filter by Type</h2>
-    <div class="form-check">
-        <input class="form-check-input" type="checkbox" id="type-group" checked>
-        <label class="form-check-label" for="type-group">Group</label>
-    </div>
-    <div class="form-check">
-        <input class="form-check-input" type="checkbox" id="type-solo" checked>
-        <label class="form-check-label" for="type-solo">Solo</label>
-    </div>
-    <div class="form-check">
-        <input class="form-check-input" type="checkbox" id="type-auction" checked>
-        <label class="form-check-label" for="type-auction">Auction</label>
+    <div class="flex-container mt-4">
+        <div class="flex-item">
+            <h2>Filter by Gender</h2>
+            <div class="gender-filters">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="gender-male-sankey" checked>
+                    <label class="form-check-label" for="gender-male-sankey">Male</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="gender-female-sankey" checked>
+                    <label class="form-check-label" for="gender-female-sankey">Female</label>
+                </div>
+            </div>
+        </div>
+        <div class="flex-item">
+            <h2>Filter by Type</h2>
+            <div class="type-filters">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="type-group" checked>
+                    <label class="form-check-label" for="type-group">Group</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="type-solo" checked>
+                    <label class="form-check-label" for="type-solo">Solo</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="type-auction" checked>
+                    <label class="form-check-label" for="type-auction">Auction</label>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div id="chart"></div>
@@ -116,6 +140,8 @@
 <script src="worldmap.js"></script>
 <script src="script.js"></script>
 
+<!-- :3 -->
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 <footer class="bg-dark text-white p-3 mt-4">
     <div class="footer-content d-flex flex-column align-items-center">
         <p>&copy; 2025 Leonhard Kohl & Christopher Scherling. All rights reserved.</p>

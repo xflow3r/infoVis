@@ -6,16 +6,24 @@ let selectedGenders = ["M", "F"];
 let selectedTypes = ["group", "solo", "auction"];
 
 // Set up the SVG canvas dimensions
-const width = 900, height = 600;
+// const width = 900, height = 600;
 
+// Set up the dimensions and margins of the diagram
+const margin = { top: 10, right: 10, bottom: 10, left: 10 },
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+// Append the SVG object to the body of the page
 const svg = d3.select("#chart")
     .append("svg")
-    .attr("width", width)
-    .attr("height", height);
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
 
-// Create a Sankey generator
+// Set up the Sankey generator
 const sankey = d3.sankey()
-    .nodeWidth(20)
+    .nodeWidth(36)
     .nodePadding(10)
     .extent([[1, 1], [width - 1, height - 6]]);
 
