@@ -85,8 +85,15 @@ function populateCountryDropdown() {
         // Extract unique countries from the dataset
         const countries = [...new Set(data.map(d => d["a.nationality"]))];
 
+        const filteredCountries = countries.filter(country =>
+            !selectedCountries.includes(country) && country !== "\\N"
+        );
+
         const dropdown = d3.select("#country-dropdown");
-        countries.forEach(country => {
+
+        dropdown.selectAll("option").remove();
+
+        filteredCountries.forEach(country => {
             dropdown.append("option")
                 .attr("value", country)
                 .text(country);
@@ -106,7 +113,11 @@ function updateSelectedCountries() {
         .map(option => option.value);
 
     currentlySelectedCountries.forEach(country => {
-        if (!selectedCountries.includes(country)) {
+        if (selectedCountries.includes(country)) {
+            // Country is already in the selected list, so remove it
+            selectedCountries = selectedCountries.filter(c => c !== country);
+        } else {
+            // Country is not in the selected list, so add it
             selectedCountries.push(country);
         }
     });
@@ -135,6 +146,7 @@ function updateSelectedCountries() {
     console.log(selectedCountries);
     // Update the Sankey diagram
     updateSankeyDiagram(selectedCountries, selectedGenders, selectedTypes);
+    populateCountryDropdown();
 }
 
 // Update the event listener for country dropdown to properly handle multiple selections
@@ -147,6 +159,7 @@ function getSelectedCountries() {
     return Array.from(document.querySelectorAll("#selected-countries li"))
         .map(item => item.textContent);
 }
+
 
 // Function to update the Sankey diagram based on selected countries
 // Function to update the Sankey diagram based on selected countries
