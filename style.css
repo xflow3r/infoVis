@@ -1,45 +1,70 @@
 /* General styles */
+:root {
+    --primary-color: #4CAF50;
+    --secondary-color: #333;
+    --background-color: #f5f5f5;
+    --text-color: #333;
+    --light-background: #ffffff;
+    --dark-background: #121212;
+    --light-text: #000000;
+    --dark-text: #ffffff;
+
+    --hue: 223;
+    --bg: hsl(var(--hue),10%,90%);
+    --fg: hsl(var(--hue),10%,10%);
+}
+
 body {
-    font-family: 'Roboto', sans-serif;
-    background-color: #f5f5f5;
-    color: #333;
+    background: linear-gradient(120deg, hsl(var(--hue), 10%, 90%) 35%, hsl(var(--hue), 10%, 50%));
+    background-attachment: fixed;
+    color: var(--fg);
+    font: 1em/1.5 "DM Sans", sans-serif;
+    height: 100vh;
+    display: grid;
+    place-items: center;
+    min-height: 320px;
     margin: 0;
     padding: 0;
+    padding-bottom: 100px; /* Add extra space at the bottom */
 }
 
 /* Header styles */
 header {
-    background-color: #333;
+    background-color: var(--secondary-color);
     color: white;
-    padding: 1rem;
+    padding: 0.5rem; /* Adjusted padding */
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 100%; /* Ensure the header spans the entire width */
+    /*position: fixed; !* Fix the header at the top *!*/
+    top: 0;
+    left: 0;
+    z-index: 1000; /* Ensure the header is above other content */
 }
-
 header h1 {
-    font-size: 1.5rem;
+    font-size: 1.25rem; /* Adjusted font size */
     margin: 0;
 }
 
 header nav a {
     color: white;
     text-decoration: none;
-    margin: 0 1rem;
-    font-size: 1rem;
+    margin: 0 0.5rem; /* Adjusted margin */
+    font-size: 0.875rem; /* Adjusted font size */
     transition: color 0.3s;
 }
 
 header nav a:hover {
-    color: #4CAF50;
+    color: var(--primary-color);
 }
 
 /* Container styles */
 .container {
     max-width: 1200px;
-    margin: 2rem auto;
-    padding: 1rem;
-    background-color: white;
+    margin: 0 auto; /* Center the container */
+    padding: 0 1rem; /* Add padding to the sides */
+    background-color: var(--light-background);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
 }
@@ -47,25 +72,26 @@ header nav a:hover {
 /* Flex container styles */
 .flex-container {
     display: flex;
-    gap: 20px;
+    gap: 10px; /* Adjusted gap */
+    flex-wrap: wrap;
 }
 
 .flex-item {
-    flex: 1;
-    background-color: #f9f9f9;
-    padding: 1rem;
+    flex: 1 1 45%;
+    background-color: var(--light-background);
+    padding: 0.5rem; /* Adjusted padding */
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .flex-item h2 {
-    font-size: 1.25rem;
-    margin-bottom: 1rem;
+    font-size: 1rem; /* Adjusted font size */
+    margin-bottom: 0.5rem; /* Adjusted margin */
 }
 
 .flex-item select, .flex-item ul {
     width: 100%;
-    padding: 0.5rem;
+    padding: 0.25rem; /* Adjusted padding */
     border: 1px solid #ccc;
     border-radius: 4px;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -79,31 +105,31 @@ header nav a:hover {
 
 .flex-item ul li {
     background-color: #e9e9e9;
-    margin-bottom: 0.5rem;
-    padding: 0.5rem;
+    margin-bottom: 0.25rem; /* Adjusted margin */
+    padding: 0.25rem; /* Adjusted padding */
     border-radius: 4px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 /* Input styles */
 input[type="radio"], input[type="checkbox"] {
-    margin-right: 0.5rem;
+    margin-right: 0.25rem; /* Adjusted margin */
 }
 
 input[type="range"] {
     width: 100%;
-    margin: 1rem 0;
+    margin: 0.5rem 0; /* Adjusted margin */
 }
 
 input[type="range"]::-webkit-slider-thumb {
-    background-color: #4CAF50;
+    background-color: var(--primary-color);
     border: none;
     border-radius: 50%;
     cursor: pointer;
 }
 
 input[type="range"]::-moz-range-thumb {
-    background-color: #4CAF50;
+    background-color: var(--primary-color);
     border: none;
     border-radius: 50%;
     cursor: pointer;
@@ -111,58 +137,96 @@ input[type="range"]::-moz-range-thumb {
 
 /* Form check styles */
 .form-check {
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem; /* Adjusted margin */
+    display: flex;
+    align-items: center;
+    gap: 2px; /* Adjusted gap */
 }
 
 .form-check-label {
-    font-size: 1rem;
+    font-size: 0.875rem; /* Adjusted font size */
 }
 
 /* Tooltip styles */
 #tooltip {
     background-color: rgba(0, 0, 0, 0.75);
-    color: black;
-    padding: 0.5rem;
+    color: white;
+    padding: 0.25rem; /* Adjusted padding */
     border-radius: 4px;
-    font-size: 0.875rem;
+    font-size: 0.75rem; /* Adjusted font size */
 }
 
 /* Footer styles */
 footer {
-    background-color: #333;
+    background-color: var(--secondary-color);
     color: white;
-    padding: 1rem;
+    padding: 0.5rem;
     text-align: center;
+    width: 100%; /* Ensure the footer spans the entire width */
+    position: relative; /* Fix the footer at the bottom */
+    bottom: 0;
+    left: 0;
+    z-index: 1000; /* Ensure the footer is above other content */
 }
 
 footer nav a {
     color: white;
     text-decoration: none;
-    margin: 0 1rem;
-    font-size: 1rem;
+    margin: 0 0.5rem; /* Adjusted margin */
+    font-size: 0.875rem; /* Adjusted font size */
     transition: color 0.3s;
 }
 
 footer nav a:hover {
-    color: #4CAF50;
+    color: var(--primary-color);
 }
 
-.flex-container {
-    display: flex;
-    gap: 20px;
+/* Dark mode styles */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: var(--dark-background);
+        color: var(--dark-text);
+    }
+
+    .flex-item {
+        background-color: var(--dark-background);
+        color: var(--dark-text);
+    }
 }
 
-.flex-item {
-    flex: 1;
+/* Responsive styles */
+@media (max-width: 768px) {
+    .flex-item {
+        flex: 1 1 100%;
+    }
 }
 
-.gender-filters, .type-filters {
-    display: flex;
-    gap: 10px;
-}
 
-.form-check {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+
+

@@ -59,8 +59,8 @@ document.getElementById("type-auction").addEventListener("change", updateTypeFil
 // Function to handle gender filter changes
 function updateGenderFilter() {
     // Get the state of the gender checkboxes
-    const maleChecked = document.getElementById("gender-male").checked;
-    const femaleChecked = document.getElementById("gender-female").checked;
+    const maleChecked = document.getElementById("gender-male-sankey").checked;
+    const femaleChecked = document.getElementById("gender-female-sankey").checked;
 
     // Update the selectedGenders array based on the checkbox states
     selectedGenders = []; // Reset selectedGenders
@@ -75,8 +75,8 @@ function updateGenderFilter() {
     updateSankeyDiagram(selectedCountries, selectedGenders, selectedTypes); // Update the Sankey diagram
 }
 
-document.getElementById("gender-male").addEventListener("change", updateGenderFilter);
-document.getElementById("gender-female").addEventListener("change", updateGenderFilter);
+document.getElementById("gender-male-sankey").addEventListener("change", updateGenderFilter);
+document.getElementById("gender-female-sankey").addEventListener("change", updateGenderFilter);
 
 
 // Function to populate the country dropdown

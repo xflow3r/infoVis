@@ -1,0 +1,88 @@
+:root {
+    --accent: #007ECC;
+    --accent-2: #EC2F4B;
+    --text: #003f66;
+    --text-hover: var(--accent);
+    --text-active: #FFFFFF;
+    --border-width: 0.125em;
+}
+
+html, body {
+    height: 100%;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.hidden-toggles {
+    position: absolute;
+    border-radius: 999em;
+    overflow: hidden;
+
+    height: 3em; /* Increased height */
+    width: 26.66em; /* Adjusted width to fit four buttons */
+
+    display: flex;
+    flex-direction: row-reverse;
+
+    > * {
+        flex: 0 0 25%; /* Adjusted flex basis to 25% for four buttons */
+    }
+
+    &:after {
+        content: "";
+
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+
+        border: var(--border-width) solid var(--accent);
+        border-radius: 999em;
+        pointer-events: none;
+    }
+}
+
+.hidden-toggles__input {
+    display: none;
+
+    &:checked + .hidden-toggles__label {
+        background-color: var(--accent);
+        color: var(--text-active);
+
+        &:before {
+            opacity: 1;
+        }
+
+        &:last-of-type {
+            background: linear-gradient(90deg, var(--accent) 0%, var(--accent-2) 100%);
+        }
+    }
+}
+
+.hidden-toggles__label {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Center content */
+    padding: 0.5em 0; /* Add padding to top and bottom */
+
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s ease-out;
+    color: var(--text);
+
+    &:hover {
+        color: var(--text-hover);
+    }
+
+    &:nth-of-type(2) {
+        border-left: var(--border-width) solid var(--accent);
+        border-right: var(--border-width) solid var(--accent);
+    }
+
+    &:last-of-type {
+        border-left: var(--border-width) solid var(--accent);
+    }
+}

@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="header.css">
     <link rel="stylesheet" href="footer.css">
+    <link rel="stylesheet" href="radio-buttons.css">
     <link rel="stylesheet" href="https://d3-geomap.github.io/d3-geomap/css/d3.geomap.min.css">
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://d3-geomap.github.io/d3-geomap/js/d3.geomap.min.js"></script>
@@ -39,24 +40,17 @@
     <div class="flex-container">
         <div class="flex-item">
             <h2>Filter by Gender</h2>
-            <div class="gender-filters">
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="gender" value="A" id="gender-all" checked>
-                    <label class="form-check-label" for="gender-all">All</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="gender" value="M" id="gender-male">
-                    <label class="form-check-label" for="gender-male">Male</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="gender" value="F" id="gender-female">
-                    <label class="form-check-label" for="gender-female">Female</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="gender" value="O" id="gender-other">
-                    <label class="form-check-label" for="gender-other">Other</label>
-                </div>
-            </div>
+            <input name="gender" type="radio" id="gender-all" class="hidden-toggles__input" value="A" checked>
+            <label for="gender-all" class="hidden-toggles__label">All</label>
+
+            <input name="gender" type="radio" id="gender-male" class="hidden-toggles__input" value="M">
+            <label for="gender-male" class="hidden-toggles__label">Male</label>
+
+            <input name="gender" type="radio" id="gender-female" class="hidden-toggles__input" value="F">
+            <label for="gender-female" class="hidden-toggles__label">Female</label>
+
+            <input name="gender" type="radio" id="gender-other" class="hidden-toggles__input" value="O">
+            <label for="gender-other" class="hidden-toggles__label">Other</label>
         </div>
         <div class="flex-item">
             <h2>Filter by Year</h2>
@@ -67,7 +61,8 @@
                 </div>
                 <div id="year-filter" class="form-check" style="visibility: hidden;">
                     <label for="year-slider">Year:</label>
-                    <input type="range" id="year-slider" class="form-control-range" min="0" max="2023" step="1" value="2023">
+                    <input type="range" id="year-slider" class="form-control-range" min="0" max="2023" step="1"
+                           value="2023">
                     <span id="year-value">2023</span>
                 </div>
             </div>
@@ -104,33 +99,22 @@
     <div class="flex-container mt-4">
         <div class="flex-item">
             <h2>Filter by Gender</h2>
-            <div class="gender-filters">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="gender-male-sankey" checked>
-                    <label class="form-check-label" for="gender-male-sankey">Male</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="gender-female-sankey" checked>
-                    <label class="form-check-label" for="gender-female-sankey">Female</label>
-                </div>
-            </div>
+            <input name="gender-sankey" type="checkbox" id="gender-male-sankey" class="hidden-toggles__input" value="M" checked>
+            <label for="gender-male-sankey" class="hidden-toggles__label">Male</label>
+
+            <input name="gender-sankey" type="checkbox" id="gender-female-sankey" class="hidden-toggles__input" value="F">
+            <label for="gender-female-sankey" class="hidden-toggles__label">Female</label>
         </div>
         <div class="flex-item">
             <h2>Filter by Type</h2>
-            <div class="type-filters">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="type-group" checked>
-                    <label class="form-check-label" for="type-group">Group</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="type-solo" checked>
-                    <label class="form-check-label" for="type-solo">Solo</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="type-auction" checked>
-                    <label class="form-check-label" for="type-auction">Auction</label>
-                </div>
-            </div>
+            <input name="type-sankey" type="checkbox" id="type-group" class="hidden-toggles__input" value="G" checked>
+            <label for="type-group" class="hidden-toggles__label">Group</label>
+
+            <input name="type-sankey" type="checkbox" id="type-solo" class="hidden-toggles__input" value="S">
+            <label for="type-solo" class="hidden-toggles__label">Solo</label>
+
+            <input name="type-sankey" type="checkbox" id="type-auction" class="hidden-toggles__input" value="A">
+            <label for="type-auction" class="hidden-toggles__label">Auction</label>
         </div>
     </div>
 
@@ -140,16 +124,14 @@
 <script src="worldmap.js"></script>
 <script src="script.js"></script>
 
+<h1 class="invisible">:3</h1>
+<h1 class="invisible">:3</h1>
+
 <!-- :3 -->
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 <footer class="bg-dark text-white p-3 mt-4">
     <div class="footer-content d-flex flex-column align-items-center">
-        <p>&copy; 2025 Leonhard Kohl & Christopher Scherling. All rights reserved.</p>
-        <nav>
-            <a href="#privacy-policy" class="text-white mx-2">Privacy Policy</a>
-            <a href="#terms-of-service" class="text-white mx-2">Terms of Service</a>
-            <a href="#contact" class="text-white mx-2">Contact</a>
-        </nav>
+        &copy; 2025 Leonhard Kohl & Christopher Scherling<br> All rights reserved
     </div>
 </footer>
 
