@@ -65,10 +65,13 @@ const countryCodeMapping = {
 const width_map = 960;
 const height_map = 500;
 
-const canvas = d3.select("body")
-    .append("canvas")
-    .attr("width", width_map
-)
+const mapContainer = d3.select("#worldmap");
+
+// Clear any existing content in the div
+
+// Append the canvas to the mapContainer
+const canvas = mapContainer.append("canvas")
+    .attr("width", width_map)
     .attr("height", height_map)
     .node();
 
@@ -77,17 +80,18 @@ const context = canvas.getContext("2d");
 const projection = d3.geoMercator()
     .scale(800) // Adjust scale for Europe
     .center([15, 50]) // Center the map on Europe
-    .translate([width_map
- / 2, height_map / 2]);
+    .translate([width_map / 2, height_map / 2]);
 
 const path = d3.geoPath().projection(projection).context(context);
 
-// Load Europe-specific GeoJSON data and artist data
 // Load Europe-specific GeoJSON data and artist data
 Promise.all([
     fetch("https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson").then(res => res.json()),
     d3.csv("data/artvis_dump_NEW.csv")
 ]).then(([europeData, artistData]) => {
+    console.log("Europe data loaded:", europeData);
+    console.log("Artist data loaded:", artistData);
+
     const countries = europeData.features;
 
     // Normalize nationality codes and prepare artist data
@@ -103,6 +107,8 @@ Promise.all([
         }
     );
 
+    console.log("Artist counts by country and gender:", artistCounts);
+
     // Find the minimum birth year (excluding 0)
     const minYear = d3.min(Array.from(artistData, d => {
         const birthdate = d["a.birthdate"];
@@ -112,6 +118,8 @@ Promise.all([
         }
         return null;
     }).filter(year => year !== null)) - 1;
+
+    console.log("Minimum birth year:", minYear);
 
     // Update slider minimum value
     const yearSlider = document.getElementById("year-slider");
@@ -126,11 +134,14 @@ Promise.all([
         const selectedYear = +yearSlider.value;
         const filterByYear = document.getElementById("filter-by-year").checked;
 
+        console.log("Selected gender:", selectedGender);
+        console.log("Selected year:", selectedYear);
+        console.log("Filter by year:", filterByYear);
+
         // Show or hide the slider based on checkbox
         document.getElementById("year-filter").style.visibility = filterByYear ? "visible" : "hidden";
 
         // Define color scales based on selected gender
-
         if (selectedGender === "A") {
             colorScale = d3.scaleSequentialLog(d3.interpolateYlOrBr);
         } else if (selectedGender === "M") {
@@ -171,11 +182,12 @@ Promise.all([
             }
         });
 
+        console.log("Artist counts by country:", artistCountsByCountry);
+
         const maxCount = d3.max(Array.from(artistCountsByCountry.values()));
         colorScale.domain([1, maxCount || 1]); // Ensure domain is valid
 
-        context.clearRect(0, 0, width_map
-, height_map);
+        context.clearRect(0, 0, width_map, height_map);
 
         countries.forEach(feature => {
             const countryName = feature.properties.ADMIN;
@@ -234,7 +246,6 @@ Promise.all([
         }
     });
 
-
     canvas.addEventListener("click", event => {
         const [mx, my] = [event.offsetX, event.offsetY];
 
@@ -280,7 +291,6 @@ Promise.all([
             tooltip.style("visibility", "hidden");
         }
     });
-
 
 }).catch(err => console.error("Error loading data:", err));
 
