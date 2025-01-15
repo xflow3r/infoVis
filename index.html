@@ -55,14 +55,13 @@
         <div class="flex-item">
             <h2>Filter by Year</h2>
             <div class="year-filters">
-                <div class="form-check">
+                <div class="form-check modern-checkbox">
                     <input class="form-check-input" type="checkbox" id="filter-by-year">
-                    <label class="form-check-label" for="filter-by-year">Filter by Year</label>
+                    <label class="form-check-label" for="filter-by-year">enable Filter by Year</label>
                 </div>
                 <div id="year-filter" class="form-check" style="visibility: hidden;">
                     <label for="year-slider">Year:</label>
-                    <input type="range" id="year-slider" class="form-control-range" min="0" max="2023" step="1"
-                           value="2023">
+                    <input type="range" id="year-slider" class="win10-thumb" min="0" max="2023" step="1" value="2023">
                     <span id="year-value">2023</span>
                 </div>
             </div>
@@ -99,10 +98,12 @@
     <div class="flex-container mt-4">
         <div class="flex-item">
             <h2>Filter by Gender</h2>
-            <input name="gender-sankey" type="checkbox" id="gender-male-sankey" class="hidden-toggles__input" value="M" checked>
+            <input name="gender-sankey" type="checkbox" id="gender-male-sankey" class="hidden-toggles__input" value="M"
+                   checked>
             <label for="gender-male-sankey" class="hidden-toggles__label">Male</label>
 
-            <input name="gender-sankey" type="checkbox" id="gender-female-sankey" class="hidden-toggles__input" value="F">
+            <input name="gender-sankey" type="checkbox" id="gender-female-sankey" class="hidden-toggles__input"
+                   value="F">
             <label for="gender-female-sankey" class="hidden-toggles__label">Female</label>
         </div>
         <div class="flex-item">

@@ -201,32 +201,53 @@ footer nav a:hover {
     }
 }
 
+.modern-checkbox {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
 
-/**/
-/**/
-/**/
-/**/
-/**/
-/**/
-/**/
-/**/
-/**/
-/**/
-/**/
-/**/
-/**/
-/**/
-/**/
-/**/
-/**/
-/**/
-/**/
-/**/
-/**/
-/**/
-/**/
-/**/
-/**/
-/**/
+.modern-checkbox .form-check-input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
 
+.modern-checkbox .form-check-label {
+    position: relative;
+    padding-left: 2em;
+    cursor: pointer;
+    user-select: none;
+}
 
+.modern-checkbox .form-check-label:before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1.5em;
+    height: 1.5em;
+    border: 2px solid var(--accent);
+    border-radius: 0.25em;
+    background-color: var(--background);
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.modern-checkbox .form-check-input:checked ~ .form-check-label:before {
+    background-color: var(--accent);
+    border-color: var(--accent);
+}
+
+.modern-checkbox .form-check-input:checked ~ .form-check-label:after {
+    content: "";
+    position: absolute;
+    left: 0.4em;
+    top: 50%;
+    transform: translateY(-50%) rotate(45deg);
+    width: 0.5em;
+    height: 1em;
+    border: solid var(--background);
+    border-width: 0 0.2em 0.2em 0;
+    transition: border-color 0.3s;
+}
