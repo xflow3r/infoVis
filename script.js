@@ -151,6 +151,14 @@ function getSelectedCountries() {
 // Function to update the Sankey diagram based on selected countries
 // Function to update the Sankey diagram based on selected countries
 function updateSankeyDiagram(selectedCountries, selectedGenders, selectedTypes) {
+    if (selectedCountries.length === 0 || selectedGenders.length === 0 || selectedTypes.length === 0) {
+        console.warn("No countries selected. Clearing the Sankey diagram.");
+        // Clear the SVG content
+        svg.selectAll("*").remove();
+        return; // Exit the function early
+    }
+
+
     // Load the data
     d3.csv("data/artvis_dump_NEW.csv").then(data => {
         console.time("Processing Data");
